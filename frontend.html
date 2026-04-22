@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badminton Video Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .upload-text strong {
+            color: #667eea;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e7ff;
+            color: #667eea;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #c7d2ff;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .progress-section {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar-container {
+            background: #e0e7ff;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.9em;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .videos-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .video-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .video-item:hover {
+            background: #f0f2ff;
+            transform: translateX(5px);
+        }
+
+        .video-item.selected {
+            background: #e8ebff;
+            border-left-color: #764ba2;
+        }
+
+        .video-item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .video-item-info {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .video-item-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .status-processing {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .segments-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .segment-item {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #667eea;
+            font-size: 0.9em;
+        }
+
+        .segment-item.point {
+            border-left-color: #10b981;
+        }
+
+        .segment-item.break {
+            border-left-color: #f59e0b;
+        }
+
+        .segment-label {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+
+        .label-point {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .label-break {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .segment-time {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .checkbox-group {
+            margin: 15px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-item input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #dc2626;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #0c4a6e;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .divider {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-videos {
+            color: #999;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .action-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .video-details {
+            background: #f8f9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .stat {
+            display: inline-block;
+            margin-right: 20px;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏸 Badminton Video Editor</h1>
+            <p>Intelligent video editing powered by machine learning</p>
+        </header>
+
+        <div class="content">
+            <!-- Upload Section -->
+            <div class="card">
+                <h2>📤 Upload Video</h2>
+                
+                <div class="alert alert-error" id="uploadError"></div>
+                <div class="alert alert-success" id="uploadSuccess"></div>
+
+                <div class="upload-area" id="uploadArea" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="upload-icon">📹</div>
+                    <div class="upload-text">
+                        Drag and drop your badminton video here<br>
+                        <strong>or click to browse</strong>
+                    </div>
+                    <p style="font-size: 0.85em; color: #999; margin-top: 10px;">
+                        Supported: MP4, AVI, MOV, MKV (Max 2GB)
+                    </p>
+                </div>
+
+                <input type="file" id="videoFile" accept="video/*" onchange="handleFileSelect(event)">
+
+                <div class="progress-section" id="progressSection">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="progressText">Uploading...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Videos List & Editing -->
+            <div class="card">
+                <h2>📋 Your Videos</h2>
+
+                <div class="alert alert-info" id="editorAlert"></div>
+
+                <div class="videos-list" id="videosList">
+                    <div class="no-videos">No videos uploaded yet</div>
+                </div>
+
+                <div id="editorSection" style="display: none;">
+                    <div class="divider"></div>
+
+                    <h3 style="margin-bottom: 15px; color: #333;">Edit Video</h3>
+
+                    <div class="video-details" id="selectedVideoDetails"></div>
+
+                    <div class="checkbox-group">
+                        <strong style="display: block; margin-bottom: 10px;">Keep in edited video:</strong>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="keepPoints" checked>
+                            <label for="keepPoints">
+                                <span class="segment-label label-point">Point</span>
+                                (active gameplay)
+                            </label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="keepBreaks">
+                            <label for="keepBreaks">
+                                <span class="segment-label label-break">Break</span>
+                                (shuttle pickup)
+                            </label>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 20px 0 15px 0; color: #333;">Detected Segments</h3>
+                    <div class="segments-list" id="segmentsList"></div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-success" onclick="editVideo()" id="editBtn">
+                            ✨ Create Edited Video
+                        </button>
+                        <button class="btn btn-secondary" onclick="refreshSegments()">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edited Videos Section -->
+        <div class="card">
+            <h2>✂️ Edited Videos</h2>
+            <div id="editedVideosList" style="color: #999; text-align: center; padding: 20px;">
+                No edited videos yet
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let selectedVideoId = null;
+        let allVideos = [];
+
+        // Initialize
+        document.getElementById('uploadArea').addEventListener('click', () => {
+            document.getElementById('videoFile').click();
+        });
+
+        loadVideos();
+        setInterval(loadVideos, 3000);
+
+        // ==================== Upload Handlers ====================
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('uploadArea').classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('uploadArea').classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('uploadArea').classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadVideo(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                uploadVideo(files[0]);
+            }
+        }
+
+        async function uploadVideo(file) {
+            if (!file.type.startsWith('video/')) {
+                showError('uploadError', 'Please select a valid video file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const progressSection = document.getElementById('progressSection');
+            progressSection.style.display = 'block';
+
+            try {
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        updateProgress(percentComplete, 'Uploading...');
+                    }
+                });
+
+                xhr.addEventListener('load', async () => {
+                    if (xhr.status === 202) {
+                        showSuccess('uploadSuccess', '✓ Video uploaded! ML processing started...');
+                        document.getElementById('videoFile').value = '';
+                        updateProgress(100, 'Processing video...');
+                        await loadVideos();
+                    } else {
+                        showError('uploadError', 'Upload failed. Try again.');
+                    }
+                });
+
+                xhr.addEventListener('error', () => {
+                    showError('uploadError', 'Upload failed. Check your connection.');
+                });
+
+                xhr.open('POST', `${API_BASE}/upload`, true);
+                xhr.send(formData);
+            } catch (error) {
+                showError('uploadError', error.message);
+            }
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = Math.round(percent) + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        // ==================== Video List ====================
+        async function loadVideos() {
+            try {
+                const response = await fetch(`${API_BASE}/videos`);
+                allVideos = await response.json();
+                renderVideosList();
+            } catch (error) {
+                console.error('Error loading videos:', error);
+            }
+        }
+
+        function renderVideosList() {
+            const videosList = document.getElementById('videosList');
+            
+            if (allVideos.length === 0) {
+                videosList.innerHTML = '<div class="no-videos">No videos uploaded yet</div>';
+                return;
+            }
+
+            videosList.innerHTML = allVideos.map(video => `
+                <div class="video-item ${selectedVideoId === video.id ? 'selected' : ''}" 
+                     onclick="selectVideo(${video.id})">
+                    <div class="video-item-name">${escapeHtml(video.filename)}</div>
+                    <div class="video-item-info">
+                        Duration: ${formatTime(video.duration)} | Uploaded: ${new Date(video.upload_date).toLocaleDateString()}
+                    </div>
+                    <div class="video-item-status ${getStatusClass(video.status)}">
+                        ${getStatusIcon(video.status)} ${video.status.toUpperCase()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function selectVideo(videoId) {
+            selectedVideoId = videoId;
+            renderVideosList();
+            await loadSegments();
+            document.getElementById('editorSection').style.display = 'block';
+            updateSelectedVideoDetails();
+        }
+
+        function updateSelectedVideoDetails() {
+            const video = allVideos.find(v => v.id === selectedVideoId);
+            if (!video) return;
+
+            document.getElementById('selectedVideoDetails').innerHTML = `
+                <div>
+                    <strong>${escapeHtml(video.filename)}</strong>
+                    <div class="stat">
+                        <span>Duration:</span> <span class="stat-value">${formatTime(video.duration)}</span>
+                    </div>
+                    <div class="stat">
+                        <span>Status:</span> <span class="stat-value">${video.status}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== Segments ====================
+        async function loadSegments() {
+            try {
+                const response = await fetch(`${API_BASE}/video/${selectedVideoId}/segments`);
+                const segments = await response.json();
+                renderSegments(segments);
+            } catch (error) {
+                console.error('Error loading segments:', error);
+            }
+        }
+
+        function renderSegments(segments) {
+            const segmentsList = document.getElementById('segmentsList');
+            
+            if (segments.length === 0) {
+                segmentsList.innerHTML = '<div style="color: #999; padding: 20px; text-align: center;">Processing... No segments yet</div>';
+                return;
+            }
+
+            segmentsList.innerHTML = segments.map(seg => `
+                <div class="segment-item ${seg.label}">
+                    <span class="segment-label ${seg.label === 'point' ? 'label-point' : 'label-break'}">
+                        ${seg.label.toUpperCase()}
+                    </span>
+                    <div class="segment-time">
+                        ${formatTime(seg.start_time)} → ${formatTime(seg.end_time)} 
+                        (${(seg.duration || 0).toFixed(2)}s)
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function refreshSegments() {
+            await loadSegments();
+            showSuccess('editorAlert', 'Segments refreshed');
+            setTimeout(() => document.getElementById('editorAlert').classList.remove('show'), 3000);
+        }
+
+        // ==================== Video Editing ====================
+        async function editVideo() {
+            const keepLabels = [];
+            if (document.getElementById('keepPoints').checked) keepLabels.push('point');
+            if (document.getElementById('keepBreaks').checked) keepLabels.push('break');
+
+            if (keepLabels.length === 0) {
+                showError('editorAlert', 'Select at least one segment type to keep');
+                return;
+            }
+
+            const editBtn = document.getElementById('editBtn');
+            editBtn.disabled = true;
+            editBtn.innerHTML = '<span class="spinner"></span>Creating...';
+
+            try {
+                const response = await fetch(`${API_BASE}/video/${selectedVideoId}/edit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keep_labels: keepLabels })
+                });
+
+                const data = await response.json();
+                showSuccess('editorAlert', `✓ Video edited! File: ${data.output_filename}`);
+                await loadVideos();
+            } catch (error) {
+                showError('editorAlert', 'Editing failed: ' + error.message);
+            } finally {
+                editBtn.disabled = false;
+                editBtn.innerHTML = '✨ Create Edited Video';
+            }
+        }
+
+        // ==================== Utilities ====================
+        function formatTime(seconds) {
+            if (!seconds) return '0:00';
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            
+            if (hours > 0) {
+                return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+            return `${minutes}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getStatusIcon(status) {
+            const icons = {
+                'uploaded': '📤',
+                'processing': '⏳',
+                'completed': '✓',
+                'error': '✗'
+            };
+            return icons[status] || '❓';
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'processing': 'status-processing',
+                'completed': 'status-completed',
+                'error': 'status-error'
+            };
+            return classes[status] || '';
+        }
+
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.add('show');
+        }
+
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.className = 'alert alert-success show';
+            element.textContent = message;
+        }
+    </script>
+</body>
+</html>
