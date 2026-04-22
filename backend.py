@@ -14,91 +14,122 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import threading
+from ultralytics import YOLO
 
 # ==================== ML MODEL ====================
 class BadmintonPointDetector:
     """
     Machine Learning model for detecting badminton points.
-    Uses motion detection and frame analysis to identify:
-    - Point in progress (high motion, players in action)
-    - Point ended (still frames, pickup period)
+    Uses YOLO to detect shuttlecock in each frame:
+    - has_ball = 1: Shuttlecock detected (point in progress)
+    - has_ball = 0: No shuttlecock (break period)
+    
+    Smoothing with sliding window:
+    - 20-frame window
+    - If > 10 frames have ball, mark as valid segment
     """
     
     def __init__(self):
-        self.motion_threshold = 5000
-        self.still_threshold = 2000
-        self.frame_buffer = []
-        self.buffer_size = 30
+        self.model = YOLO('yolov8n.pt')
+        self.window_size = 20
+        self.ball_threshold = 10
+        self.confidence_threshold = 0.5
+        self.ball_labels = ['sports ball', 'ball']
         
-    def detect_motion(self, frame1, frame2):
-        """Detect motion between two frames using optical flow."""
-        gray1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
-        gray2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+    def detect_ball(self, frame):
+        """Detect if shuttlecock exists in frame using YOLO."""
+        results = self.model(frame, verbose=False)
         
-        diff = cv2.absdiff(gray1, gray2)
-        motion_score = np.sum(diff)
-        return motion_score
+        has_ball = 0
+        for result in results:
+            if result.boxes is not None:
+                for box in result.boxes:
+                    conf = box.conf.item()
+                    if conf > self.confidence_threshold:
+                        class_id = int(box.cls.item())
+                        class_name = self.model.names[class_id].lower()
+                        
+                        if 'ball' in class_name or 'sports' in class_name:
+                            has_ball = 1
+                            break
+        
+        return has_ball
     
-    def analyze_frame_sequence(self, frames):
-        """Analyze sequence of frames to detect point start/end."""
-        if len(frames) < 2:
-            return None
+    def smooth_with_sliding_window(self, ball_flags):
+        """
+        Smooth detection results with sliding window.
+        If > 10 frames in 20-frame window have ball, mark as valid.
+        """
+        smoothed = []
+        for i in range(len(ball_flags)):
+            start = max(0, i - self.window_size // 2)
+            end = min(len(ball_flags), i + self.window_size // 2)
+            
+            window = ball_flags[start:end]
+            ball_count = sum(window)
+            
+            if ball_count > self.ball_threshold:
+                smoothed.append(1)
+            else:
+                smoothed.append(0)
         
-        motion_scores = []
-        for i in range(1, len(frames)):
-            score = self.detect_motion(frames[i-1], frames[i])
-            motion_scores.append(score)
+        return smoothed
+    
+    def extract_continuous_segments(self, smoothed_flags, fps):
+        """Extract continuous valid segments from smoothed flags."""
+        segments = []
+        start_frame = None
         
-        avg_motion = np.mean(motion_scores)
-        is_point_active = avg_motion > self.motion_threshold
+        for frame_idx, is_valid in enumerate(smoothed_flags):
+            if is_valid == 1 and start_frame is None:
+                start_frame = frame_idx
+            elif is_valid == 0 and start_frame is not None:
+                segments.append({
+                    'start_frame': start_frame,
+                    'end_frame': frame_idx,
+                    'start_time': start_frame / fps,
+                    'end_time': frame_idx / fps,
+                    'label': 'point'
+                })
+                start_frame = None
         
-        return {
-            'is_active': is_point_active,
-            'motion_score': avg_motion,
-            'motion_scores': motion_scores
-        }
+        if start_frame is not None:
+            segments.append({
+                'start_frame': start_frame,
+                'end_frame': len(smoothed_flags),
+                'start_time': start_frame / fps,
+                'end_time': len(smoothed_flags) / fps,
+                'label': 'point'
+            })
+        
+        return segments
     
     def process_video(self, video_path, callback=None):
         """
-        Process video file and detect point boundaries.
-        Returns list of segments with start/end times and labels.
+        Process video and detect badminton point segments.
+        
+        Steps:
+        1. Detect ball in each frame (YOLO)
+        2. Create has_ball flags for all frames
+        3. Smooth with sliding window (20 frames, >10 threshold)
+        4. Extract continuous valid segments
+        5. Return segments for video editing
         """
         cap = cv2.VideoCapture(video_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         
-        segments = []
+        ball_flags = []
         frame_count = 0
-        prev_state = None
-        segment_start = 0
         
         while True:
             ret, frame = cap.read()
             if not ret:
                 break
             
-            # Resize for faster processing
             frame = cv2.resize(frame, (640, 480))
-            self.frame_buffer.append(frame)
-            
-            if len(self.frame_buffer) > self.buffer_size:
-                self.frame_buffer.pop(0)
-            
-            if len(self.frame_buffer) >= 5:
-                analysis = self.analyze_frame_sequence(self.frame_buffer[-5:])
-                current_state = 'point' if analysis['is_active'] else 'break'
-                
-                if prev_state != current_state:
-                    if prev_state is not None:
-                        segments.append({
-                            'start_frame': segment_start,
-                            'end_frame': frame_count,
-                            'start_time': segment_start / fps,
-                            'end_time': frame_count / fps,
-                            'label': prev_state
-                        })
-                    segment_start = frame_count
-                    prev_state = current_state
+            has_ball = self.detect_ball(frame)
+            ball_flags.append(has_ball)
             
             frame_count += 1
             progress = (frame_count / total_frames) * 100
@@ -106,17 +137,11 @@ class BadmintonPointDetector:
             if callback:
                 callback(progress, frame_count, total_frames)
         
-        # Add final segment
-        if prev_state:
-            segments.append({
-                'start_frame': segment_start,
-                'end_frame': frame_count,
-                'start_time': segment_start / fps,
-                'end_time': frame_count / fps,
-                'label': prev_state
-            })
-        
         cap.release()
+        
+        smoothed_flags = self.smooth_with_sliding_window(ball_flags)
+        segments = self.extract_continuous_segments(smoothed_flags, fps)
+        
         return segments
 
 
