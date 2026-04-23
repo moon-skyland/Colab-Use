@@ -1,0 +1,76 @@
+.processing-container {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  max-width: 600px;
+}
+
+.status-card {
+  text-align: center;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.status-icon {
+  font-size: 36px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.status-header h3 {
+  color: #333;
+  font-size: 18px;
+  margin: 0;
+}
+
+.progress-text {
+  color: #667eea;
+  font-weight: 600;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.error-message {
+  margin-top: 16px;
+  padding: 12px;
+  background: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.result-info {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f0f9ff;
+  border-left: 4px solid #667eea;
+  border-radius: 6px;
+  text-align: left;
+}
+
+.result-info p {
+  margin: 8px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.result-info strong {
+  color: #667eea;
+}

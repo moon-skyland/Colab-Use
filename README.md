@@ -1,282 +1,297 @@
-# 🏸 Badminton Video Editor
+# Badminton Video Editor - Full Stack Application
 
-An intelligent machine learning-powered video editor that automatically detects and segments badminton gameplay points from full match videos. The system recognizes when points are being played versus when players are picking up shuttles during breaks.
+An AI-powered web application that automatically detects badminton rally segments and removes dead-time ball-picking scenes between points. Built with FastAPI backend and React frontend.
 
-## Features
+## 🎯 Features
 
-✨ **Key Capabilities**:
-- **ML-Based Point Detection**: Automatically identifies when badminton points are active vs. break periods
-- **Motion Analysis**: Uses optical flow and motion scoring to detect gameplay activity
-- **Intelligent Segmentation**: Divides videos into labeled segments (point/break)
-- **Custom Editing**: Remove break periods or keep only active gameplay
-- **Web Interface**: Modern, responsive UI for easy video management
-- **Background Processing**: Non-blocking video processing with progress tracking
-- **Database Storage**: SQLite for video and segment metadata
+- **Video Upload**: Drag-and-drop interface for video uploads
+- **Shuttlecock Detection**: AI-based detection using YOLOv8 (mock implementation for demo)
+- **Smart Smoothing**: Sliding window algorithm to reduce false positives
+- **Automatic Cutting**: Extracts continuous rally segments
+- **Video Stitching**: Combines valid segments into a single edited video
+- **Real-time Progress**: Live status updates during processing
+- **Easy Download**: One-click download of edited video
 
-## Project Structure
+## 📋 Project Structure
 
 ```
 Badminton Editor/
-├── backend.py          # Flask backend + ML engine + Database
-├── frontend.html       # Web interface (single file, no build needed)
-├── requirements.txt    # Python dependencies
-└── README.md          # This file
+├── frontend/                 # React + Vite frontend
+│   ├── src/
+│   │   ├── components/       # React components
+│   │   │   ├── UploadForm.jsx
+│   │   │   ├── UploadForm.css
+│   │   │   ├── ProcessingStatus.jsx
+│   │   │   ├── ProcessingStatus.css
+│   │   │   ├── ResultsView.jsx
+│   │   │   ├── ResultsView.css
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   ├── main.jsx
+│   │   ├── index.css
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── package.json
+│   └── .gitignore
+├── backend/                  # FastAPI backend
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── shuttlecock_detector.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── video_processor.py
+│   ├── uploads/              # Video upload directory
+│   ├── app.py               # Main FastAPI application
+│   ├── requirements.txt
+│   ├── .env
+│   └── .gitignore
+└── README.md
 ```
 
-## Installation & Setup
+## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.8+
-- macOS, Linux, or Windows
 
-### Step 1: Install Dependencies
+- **Node.js** (v16+) and npm
+- **Python** (3.8+)
+- **FFmpeg** (for video processing)
+
+### Installation & Setup
+
+#### 1. Install FFmpeg
+
+**macOS:**
+```bash
+brew install ffmpeg
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install ffmpeg
+```
+
+**Windows:**
+Download from https://ffmpeg.org/download.html
+
+#### 2. Backend Setup
 
 ```bash
+cd backend
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the backend server
+python app.py
 ```
 
-### Step 2: Start the Backend
+The backend will start at `http://localhost:8000`
+
+**API Documentation**: Visit `http://localhost:8000/docs` for interactive API docs
+
+#### 3. Frontend Setup
+
+In a new terminal:
 
 ```bash
-python backend.py
+cd frontend
+
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
 ```
 
-You should see:
+The frontend will start at `http://localhost:3000`
+
+### 🎮 Using the Application
+
+1. Open browser to `http://localhost:3000`
+2. **Upload**: Drag and drop a badminton video or click to select
+3. **Processing**: The app will:
+   - Detect shuttlecock in each frame
+   - Apply smoothing to reduce noise
+   - Extract valid rally segments
+   - Cut and stitch the video
+4. **Download**: Click "Download Edited Video" to get your processed video
+5. **Review**: Check the detected intervals in the results view
+
+### 📝 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/config` | Get API configuration |
+| POST | `/api/upload` | Upload video file |
+| POST | `/api/process` | Start processing job |
+| GET | `/api/status/{job_id}` | Check processing status |
+| GET | `/api/download/{video_id}` | Download processed video |
+| DELETE | `/api/cleanup/{video_id}` | Delete video files |
+
+### ⚙️ Configuration
+
+**Backend** (`.env`):
 ```
-WARNING in app.run_with_reloader
- * Running on http://localhost:5000
+UPLOAD_DIR=./uploads
+TEMP_DIR=./temp_segments
+MAX_VIDEO_SIZE=500000000
 ```
 
-### Step 3: Open the Frontend
+**Video Processing Parameters** (`app.py` - `/api/process`):
+- `window_size`: Sliding window size (default: 20 frames)
+- `threshold`: Minimum detections to mark as valid (default: 10)
 
-Simply open the `frontend.html` file in your web browser:
+Adjust these parameters based on:
+- Video FPS rate
+- Rally duration
+- Desired sensitivity
+
+### 🤖 Model Integration
+
+Currently, the detection uses a **mock implementation** for demo purposes.
+
+To integrate **real YOLOv8 detection**:
+
+1. **Install YOLOv8:**
+   ```bash
+   pip install ultralytics
+   ```
+
+2. **Update `backend/models/shuttlecock_detector.py`:**
+   ```python
+   from ultralytics import YOLO
+   
+   def __init__(self, model_path: str = None):
+       self.model = YOLO(model_path or "yolov8n.pt")
+   
+   def detect_frame(self, frame: np.ndarray) -> dict:
+       results = self.model(frame)
+       detected = len(results[0].boxes) > 0
+       # ... extract bbox and confidence ...
+   ```
+
+3. **Train your model** with your badminton dataset
+
+### 📊 Processing Pipeline
+
+```
+Input Video
+    ↓
+Frame-by-frame Detection (YOLO)
+    ↓
+Assign Labels (has_ball: 0/1)
+    ↓
+Sliding Window Smoothing
+    ↓
+Extract Continuous Intervals
+    ↓
+Cut Video Segments
+    ↓
+Concatenate Segments
+    ↓
+Output Video (Rally Highlight)
+```
+
+### 🎬 Example Workflow
+
+1. **Input**: 5-minute badminton video (300 seconds @ 30fps = 9000 frames)
+2. **Detection**: 60% have shuttlecock detected (random in demo, actual in real model)
+3. **Smoothing**: Using 20-frame window, 10-frame threshold
+4. **Result**: ~40-60 seconds of edited highlights (continuous rallies)
+
+### 💾 File Management
+
+- **Uploaded videos**: `backend/uploads/{video_id}.mp4`
+- **Processed videos**: `backend/uploads/{video_id}_processed.mp4`
+- **Temporary segments**: `backend/temp_segments/segment_*.mp4`
+
+**Cleanup**: Use the "Clean Up Files" button in the frontend, or:
 ```bash
-open frontend.html   # macOS
-# or
-start frontend.html  # Windows
-# or use your browser to open the file
+curl -X DELETE http://localhost:8000/api/cleanup/{video_id}
 ```
 
-Or navigate to the file directly in your browser.
+### 🧪 Testing
 
-## How It Works
+**Test curl requests:**
 
-### Architecture Overview
-
-```
-┌─────────────────────┐
-│   Frontend (HTML)   │  Web interface for upload & control
-└──────────┬──────────┘
-           │ HTTP/REST
-           ▼
-┌─────────────────────────────────────────┐
-│         Backend (Flask/Python)          │
-├─────────────────────────────────────────┤
-│ 1. File Upload Handler                  │
-│ 2. ML Point Detector (Motion Analysis)  │
-│ 3. Video Processing Engine              │
-│ 4. SQLite Database (Videos & Segments)  │
-│ 5. Video Editing/Export                 │
-└─────────────────────────────────────────┘
-           │
-           ▼
-    ┌─────────────────────┐
-    │   Video Files       │
-    │   SQLite DB         │
-    │   Edited Output     │
-    └─────────────────────┘
-```
-
-### Machine Learning Pipeline
-
-The ML model works through these steps:
-
-1. **Video Frame Extraction**: Load video at native FPS
-2. **Frame Buffering**: Maintain sliding window of frames (30-frame buffer)
-3. **Motion Detection**: Calculate optical flow between consecutive frames
-4. **Motion Scoring**: Sum absolute differences in grayscale frames
-5. **Threshold Analysis**: 
-   - If avg_motion > 5000: **Point Active** (high motion = gameplay)
-   - If avg_motion < 2000: **Break Period** (low motion = pickup time)
-6. **State Transitions**: Detect changes from point→break or break→point
-7. **Segment Creation**: Generate start/end times and labels
-
-### Video Editing Process
-
-When you click "Create Edited Video":
-- Select which segments to keep (Points, Breaks, or both)
-- The system re-encodes the video keeping only selected segments
-- Edited video is saved with timestamp: `edited_{video_id}_{timestamp}.mp4`
-
-## API Endpoints
-
-### Health Check
-```
-GET /api/health
-```
-Response: `{"status": "ok", "message": "Badminton Editor Backend Running"}`
-
-### Upload Video
-```
-POST /api/upload
-Content-Type: multipart/form-data
-Body: file (video file)
-```
-Response: Video ID, filename, duration, FPS, processing status
-
-### List Videos
-```
-GET /api/videos
-```
-Response: Array of all uploaded videos with metadata
-
-### Get Video Segments
-```
-GET /api/video/{video_id}/segments
-```
-Response: Array of detected segments with timestamps and labels
-
-### Get Processing Status
-```
-GET /api/video/{video_id}/status
-```
-Response: Current status and progress percentage
-
-### Edit Video
-```
-POST /api/video/{video_id}/edit
-Content-Type: application/json
-Body: {"keep_labels": ["point"]}
-```
-Response: Output filename and path
-
-## Database Schema
-
-### Videos Table
-```sql
-CREATE TABLE videos (
-    id INTEGER PRIMARY KEY,
-    filename TEXT,
-    original_path TEXT,
-    upload_date TIMESTAMP,
-    duration REAL,
-    fps REAL,
-    status TEXT
-);
-```
-
-### Segments Table
-```sql
-CREATE TABLE segments (
-    id INTEGER PRIMARY KEY,
-    video_id INTEGER,
-    start_frame INTEGER,
-    end_frame INTEGER,
-    start_time REAL,
-    end_time REAL,
-    label TEXT,           -- 'point' or 'break'
-    duration REAL,
-    FOREIGN KEY(video_id) REFERENCES videos(id)
-);
-```
-
-### Edited Videos Table
-```sql
-CREATE TABLE edited_videos (
-    id INTEGER PRIMARY KEY,
-    video_id INTEGER,
-    output_path TEXT,
-    edit_type TEXT,
-    segments_included TEXT,
-    created_date TIMESTAMP,
-    FOREIGN KEY(video_id) REFERENCES videos(id)
-);
-```
-
-## Configuration
-
-Edit these parameters in `backend.py` to tune the ML model:
-
-```python
-class BadmintonPointDetector:
-    def __init__(self):
-        self.motion_threshold = 5000      # Increase = stricter point detection
-        self.still_threshold = 2000       # Increase = longer break periods
-        self.buffer_size = 30             # Frame buffer for analysis
-```
-
-## Performance Tips
-
-1. **Video Optimization**: Pre-encode videos to 720p for faster processing
-2. **Batch Processing**: Process multiple videos sequentially or in parallel
-3. **Memory**: For large videos (>2GB), consider breaking into segments
-4. **GPU Acceleration**: For significant speedup, install `opencv-python-headless` with CUDA support
-
-## Troubleshooting
-
-### Backend Won't Start
 ```bash
-# Check Python version
-python --version  # Should be 3.8+
+# Upload video
+curl -X POST -F "file=@/path/to/video.mp4" http://localhost:8000/api/upload
 
-# Reinstall dependencies
-pip install --upgrade -r requirements.txt
+# Start processing
+curl -X POST "http://localhost:8000/api/process?video_id=YOUR_VIDEO_ID"
+
+# Check status
+curl http://localhost:8000/api/status/YOUR_JOB_ID
+
+# Download result
+curl http://localhost:8000/api/download/YOUR_VIDEO_ID --output result.mp4
 ```
 
-### Videos Not Processing
-1. Check backend console for errors
-2. Verify video codec is supported (H.264, VP9, etc.)
-3. Check available disk space for uploads and edited output
+### 🐛 Troubleshooting
 
-### Poor Point Detection
-1. Adjust `motion_threshold` in `backend.py`
-2. Test with well-lit videos first
-3. Ensure video has clear camera movement detection
+**Issue: "Cannot connect to backend"**
+- Ensure backend is running: `python backend/app.py`
+- Check port 8000 is not in use: `lsof -i :8000`
 
-### CORS Errors
-Already handled with Flask-CORS configuration in backend.
+**Issue: "Video processing fails"**
+- Ensure FFmpeg is installed: `ffmpeg -version`
+- Check video format is supported: `.mp4`, `.avi`, `.mov`, `.mkv`
+- Check file size doesn't exceed limit (500MB default)
 
-## Extending the System
+**Issue: "CORS errors"**
+- Backend CORS is configured for all origins in demo mode
+- In production, update to specific frontend URL
 
-### Improve ML Model
-Replace `detect_motion()` with more sophisticated methods:
-- TensorFlow/PyTorch models for player tracking
-- YOLO for badminton detection
-- Activity recognition models
+**Issue: "Out of disk space"**
+- Clean up `backend/uploads/` and `backend/temp_segments/`
+- Adjust `MAX_VIDEO_SIZE` if needed
 
-### Add Features
-- Video preview in browser
-- Frame-by-frame scrubbing
-- Manual segment adjustment UI
-- Batch export options
-- Support for live video streams
+### 🚢 Production Deployment
 
-### Scale Up
-- Replace Flask with FastAPI for async processing
-- Use Celery + Redis for task queue
-- Deploy with Docker + Kubernetes
-- Use object storage (S3) instead of local files
+1. **Build frontend:**
+   ```bash
+   cd frontend
+   npm run build
+   ```
 
-## File Organization
+2. **Use production ASGI server:**
+   ```bash
+   pip install gunicorn
+   gunicorn -w 4 -b 0.0.0.0:8000 backend.app:app
+   ```
 
-```
-uploads/                    # Uploaded videos
-edited_videos/              # Edited video outputs
-badminton_videos.db        # SQLite database
-```
+3. **Set up environment variables** for database, storage, etc.
 
-## License & Notes
+4. **Configure CORS** for your domain
 
-This is a foundation project for badminton video analysis. The ML model is a basic motion detector suitable for prototyping. For production use, consider implementing more sophisticated computer vision techniques.
+5. **Use HTTPS** and proper security headers
 
-## Support
+### 📚 Future Enhancements
 
-For issues or questions:
-1. Check the troubleshooting section
-2. Review backend console output
-3. Verify all dependencies are installed
-4. Ensure ports 5000 (backend) is available
+- [ ] Real YOLOv8 model trained on custom badminton dataset
+- [ ] Video preview before/after
+- [ ] Batch processing
+- [ ] WebSocket for real-time progress
+- [ ] Database for job history
+- [ ] Multi-user authentication
+- [ ] S3 cloud storage integration
+- [ ] Automated model retraining pipeline
+- [ ] Support for other sports
+
+### 📄 License
+
+MIT License - Free to use and modify
+
+### 👥 Authors
+
+Created for AI-powered sports video editing
 
 ---
 
-Built with ❤️ for badminton enthusiasts
+**Happy editing! 🏸**
