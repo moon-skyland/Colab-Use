@@ -1,0 +1,19 @@
+{
+  "labels": [
+    {
+      "start": 0.0,
+      "end": 4.0,
+      "state": "READY_TO_SERVE"
+    },
+    {
+      "start": 4.0,
+      "end": 8.0,
+      "state": "RALLY_ACTIVE"
+    },
+    {
+      "start": 8.0,
+      "end": 12.0,
+      "state": "DEAD_TIME"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+path: backend/data/shuttle_dataset
+train: images/train
+val: images/val
+
+names:
+  0: Shuttle

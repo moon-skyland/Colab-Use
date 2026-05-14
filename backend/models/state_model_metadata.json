@@ -1,0 +1,21 @@
+{
+  "feature_columns": [
+    "ball_visible_ratio",
+    "ball_mean_speed",
+    "ball_max_speed",
+    "ball_missing_gap",
+    "player_mean_speed",
+    "player_max_speed",
+    "players_in_service_zone",
+    "players_movement_score"
+  ],
+  "label_column": "state",
+  "classes": [
+    "DEAD_TIME",
+    "RALLY_ACTIVE",
+    "RALLY_ENDING",
+    "READY_TO_SERVE"
+  ],
+  "training_rows": 32,
+  "validation_accuracy": 1.0
+}

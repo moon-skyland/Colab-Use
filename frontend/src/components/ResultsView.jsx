@@ -65,13 +65,13 @@ export default function ResultsView({ videoId, result, apiUrl, onReset }) {
         </div>
 
         <div className="intervals-section">
-          <h3>Detected Rally Intervals</h3>
+          <h3>Detected Keep Intervals</h3>
           <div className="intervals-list">
-            {result.intervals.map((interval, idx) => (
+            {(result.intervals || []).map((interval, idx) => (
               <div key={idx} className="interval-item">
                 <span className="interval-index">{idx + 1}</span>
                 <span className="interval-text">
-                  Frames {interval[0]} - {interval[1]}
+                  {Number(interval[0]).toFixed(2)}s - {Number(interval[1]).toFixed(2)}s
                 </span>
               </div>
             ))}

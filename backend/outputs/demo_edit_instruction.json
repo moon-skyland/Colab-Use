@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "video_path": "backend/data/raw_videos/demo.mp4",
+  "output_path": "backend/outputs/demo_edited_video.mp4",
+  "keep_intervals": [
+    {
+      "start": 2.0,
+      "end": 5.5,
+      "reason": "rally_active_with_context"
+    },
+    {
+      "start": 8.0,
+      "end": 10.5,
+      "reason": "rally_active_with_context"
+    }
+  ],
+  "settings": {
+    "pre_roll_seconds": 1.0,
+    "post_roll_seconds": 0.5,
+    "min_keep_duration": 1.0,
+    "merge_gap_seconds": 0.5
+  }
+}

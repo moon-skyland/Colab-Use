@@ -1,0 +1,58 @@
+{
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 2.0,
+      "state": "DEAD_TIME",
+      "confidence": 0.925
+    },
+    {
+      "start": 2.0,
+      "end": 3.0,
+      "state": "READY_TO_SERVE",
+      "confidence": 0.81
+    },
+    {
+      "start": 3.0,
+      "end": 5.0,
+      "state": "RALLY_ACTIVE",
+      "confidence": 0.955
+    },
+    {
+      "start": 5.0,
+      "end": 6.0,
+      "state": "RALLY_ENDING",
+      "confidence": 0.84
+    },
+    {
+      "start": 6.0,
+      "end": 8.0,
+      "state": "DEAD_TIME",
+      "confidence": 0.905
+    },
+    {
+      "start": 8.0,
+      "end": 9.0,
+      "state": "READY_TO_SERVE",
+      "confidence": 0.79
+    },
+    {
+      "start": 9.0,
+      "end": 10.0,
+      "state": "RALLY_ACTIVE",
+      "confidence": 0.94
+    },
+    {
+      "start": 10.0,
+      "end": 11.0,
+      "state": "RALLY_ENDING",
+      "confidence": 0.83
+    },
+    {
+      "start": 11.0,
+      "end": 12.0,
+      "state": "DEAD_TIME",
+      "confidence": 0.92
+    }
+  ]
+}

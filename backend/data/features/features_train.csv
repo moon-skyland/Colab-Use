@@ -1,0 +1,13 @@
+video,start,end,ball_visible_ratio,ball_mean_speed,ball_max_speed,ball_missing_gap,player_mean_speed,player_max_speed,players_in_service_zone,players_movement_score,state
+sample_demo.mp4,0.0,1.0,1.0,2.0,2.0,0,0.3,0.3,2,0.6,READY_TO_SERVE
+sample_demo.mp4,1.0,2.0,1.0,2.0,2.0,0,0.3,0.3,2,0.6,READY_TO_SERVE
+sample_demo.mp4,2.0,3.0,1.0,2.0,2.0,0,0.3,0.3,2,0.6,READY_TO_SERVE
+sample_demo.mp4,3.0,4.0,1.0,2.0,2.0,0,0.3,0.3,2,0.6,READY_TO_SERVE
+sample_demo.mp4,4.0,5.0,1.0,14.0,14.0,0,2.5,2.5,2,5.0,RALLY_ACTIVE
+sample_demo.mp4,5.0,6.0,1.0,14.0,14.0,0,2.5,2.5,2,5.0,RALLY_ACTIVE
+sample_demo.mp4,6.0,7.0,1.0,14.0,14.0,0,2.5,2.5,2,5.0,RALLY_ACTIVE
+sample_demo.mp4,7.0,8.0,1.0,14.0,14.0,0,2.5,2.5,2,5.0,RALLY_ACTIVE
+sample_demo.mp4,8.0,9.0,0.0666666666666666,1.0,1.0,10,0.16,0.16,2,0.32,DEAD_TIME
+sample_demo.mp4,9.0,10.0,0.0666666666666666,1.0,1.0,10,0.16,0.16,2,0.32,DEAD_TIME
+sample_demo.mp4,10.0,11.0,0.0666666666666666,1.0,1.0,10,0.16,0.16,2,0.32,DEAD_TIME
+sample_demo.mp4,11.0,12.0,0.0666666666666666,1.0,1.0,10,0.16,0.16,2,0.32,DEAD_TIME

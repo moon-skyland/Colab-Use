@@ -1,0 +1,13 @@
+video,start,end,predicted_state,confidence
+demo.mp4,0.0,1.0,DEAD_TIME,0.93
+demo.mp4,1.0,2.0,DEAD_TIME,0.92
+demo.mp4,2.0,3.0,READY_TO_SERVE,0.81
+demo.mp4,3.0,4.0,RALLY_ACTIVE,0.95
+demo.mp4,4.0,5.0,RALLY_ACTIVE,0.96
+demo.mp4,5.0,6.0,RALLY_ENDING,0.84
+demo.mp4,6.0,7.0,DEAD_TIME,0.91
+demo.mp4,7.0,8.0,DEAD_TIME,0.9
+demo.mp4,8.0,9.0,READY_TO_SERVE,0.79
+demo.mp4,9.0,10.0,RALLY_ACTIVE,0.94
+demo.mp4,10.0,11.0,RALLY_ENDING,0.83
+demo.mp4,11.0,12.0,DEAD_TIME,0.92

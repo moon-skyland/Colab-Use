@@ -1,84 +1,168 @@
-import React, { useState } from 'react'
-import UploadForm from './components/UploadForm'
-import ProcessingStatus from './components/ProcessingStatus'
-import ResultsView from './components/ResultsView'
+import React, { useMemo, useState } from 'react'
 import './App.css'
 
-const API_URL = 'http://localhost:8000'
+const API_BASE = 'http://localhost:8000'
 
 function App() {
-  const [stage, setStage] = useState('upload') // 'upload', 'processing', 'results'
-  const [videoData, setVideoData] = useState(null)
-  const [jobData, setJobData] = useState(null)
-  const [resultsData, setResultsData] = useState(null)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [jobId, setJobId] = useState('')
+  const [uploadPath, setUploadPath] = useState('')
+  const [statusText, setStatusText] = useState('Select a video file to begin.')
+  const [isUploading, setIsUploading] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [editedVideoUrl, setEditedVideoUrl] = useState('')
+  const [editInstructionUrl, setEditInstructionUrl] = useState('')
+  const [timelineUrl, setTimelineUrl] = useState('')
+  const [error, setError] = useState('')
 
-  const handleUploadSuccess = (data) => {
-    setVideoData(data)
-    setStage('processing')
+  const originalVideoUrl = useMemo(() => {
+    if (!uploadPath) return ''
+    const filename = uploadPath.split('/').pop()
+    return filename ? `${API_BASE}/uploads/${filename}` : ''
+  }, [uploadPath])
 
-    // Automatically start processing
-    processVideo(data.video_id)
-  }
-
-  const processVideo = async (videoId) => {
-    try {
-      const response = await fetch(`${API_URL}/api/process?video_id=${videoId}`, {
-        method: 'POST',
-      })
-      const data = await response.json()
-      setJobData(data)
-    } catch (err) {
-      console.error('Error starting processing:', err)
-      alert('Failed to start processing. Please try again.')
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0] ?? null
+    setSelectedFile(file)
+    setError('')
+    if (file) {
+      setStatusText(`Selected: ${file.name}`)
     }
   }
 
-  const handleProcessingComplete = (result) => {
-    setResultsData(result)
-    setStage('results')
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setError('Please select a video file first.')
+      return
+    }
+    setIsUploading(true)
+    setError('')
+    setStatusText('Uploading video...')
+    setEditedVideoUrl('')
+    setEditInstructionUrl('')
+    setTimelineUrl('')
+
+    const formData = new FormData()
+    formData.append('video', selectedFile)
+
+    try {
+      const response = await fetch(`${API_BASE}/upload`, {
+        method: 'POST',
+        body: formData,
+      })
+      const payload = await response.json()
+      if (!response.ok) {
+        throw new Error(payload.detail || 'Upload failed.')
+      }
+      setJobId(payload.job_id)
+      setUploadPath(payload.video_path)
+      setStatusText('Upload successful. Click Process to continue.')
+    } catch (err) {
+      setError(err.message || 'Upload failed.')
+      setStatusText('Upload failed.')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
-  const handleReset = () => {
-    setStage('upload')
-    setVideoData(null)
-    setJobData(null)
-    setResultsData(null)
+  const handleProcess = async () => {
+    if (!jobId) {
+      setError('Upload a video first.')
+      return
+    }
+    setIsProcessing(true)
+    setError('')
+    setStatusText('Processing video...')
+
+    try {
+      const response = await fetch(`${API_BASE}/process/${jobId}`, {
+        method: 'POST',
+      })
+      const payload = await response.json()
+      if (!response.ok || payload.status !== 'success') {
+        throw new Error(payload.error || payload.detail || 'Processing failed.')
+      }
+      setEditedVideoUrl(`${API_BASE}${payload.edited_video_url}`)
+      setEditInstructionUrl(`${API_BASE}${payload.edit_instruction_url}`)
+      setTimelineUrl(`${API_BASE}${payload.state_timeline_url}`)
+      setStatusText('Processing complete.')
+    } catch (err) {
+      setError(err.message || 'Processing failed.')
+      setStatusText('Processing failed.')
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   return (
     <div className="app-container">
-      <div className="app-header">
-        <h1>🏸 Badminton Video Editor</h1>
-        <p>AI-powered automatic rally detection and editing</p>
-      </div>
+      <div className="card">
+        <h1>Badminton AI Editor</h1>
+        <p className="subtitle">Upload, process, preview, and download</p>
 
-      <div className="app-main">
-        {stage === 'upload' && (
-          <UploadForm onUploadSuccess={handleUploadSuccess} apiUrl={API_URL} />
-        )}
+        <div className="controls">
+          <input type="file" accept="video/*" onChange={handleFileChange} />
+          <div className="button-row">
+            <button onClick={handleUpload} disabled={isUploading}>
+              {isUploading ? 'Uploading...' : 'Upload'}
+            </button>
+            <button onClick={handleProcess} disabled={isProcessing || !jobId}>
+              {isProcessing ? 'Processing...' : 'Process'}
+            </button>
+          </div>
+        </div>
 
-        {stage === 'processing' && jobData && (
-          <ProcessingStatus
-            videoId={videoData.video_id}
-            jobId={jobData.job_id}
-            onProcessingComplete={handleProcessingComplete}
-            apiUrl={API_URL}
-          />
-        )}
+        <p className="status">{statusText}</p>
+        {error && <p className="error">{error}</p>}
 
-        {stage === 'results' && resultsData && (
-          <ResultsView
-            videoId={videoData.video_id}
-            result={resultsData}
-            apiUrl={API_URL}
-            onReset={handleReset}
-          />
-        )}
-      </div>
+        <div className="media-grid">
+          <div>
+            <h3>Original Video</h3>
+            {originalVideoUrl ? (
+              <video controls src={originalVideoUrl} className="video" />
+            ) : (
+              <p className="muted">No uploaded video preview yet.</p>
+            )}
+          </div>
 
-      <div className="app-footer">
-        <p>Made with ❤️ for badminton enthusiasts</p>
-        <p className="tech-stack">Backend: FastAPI | Frontend: React | ML: YOLOv8</p>
+          <div>
+            <h3>Edited Video</h3>
+            {editedVideoUrl ? (
+              <>
+                <video controls src={editedVideoUrl} className="video" />
+                <a href={editedVideoUrl} download className="download-link">
+                  Download edited video
+                </a>
+              </>
+            ) : (
+              <p className="muted">No edited video yet.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="links">
+          <h3>Artifacts</h3>
+          <p>
+            Edit instruction:{' '}
+            {editInstructionUrl ? (
+              <a href={editInstructionUrl} target="_blank" rel="noreferrer">
+                {editInstructionUrl}
+              </a>
+            ) : (
+              <span className="muted">Not available yet</span>
+            )}
+          </p>
+          <p>
+            State timeline:{' '}
+            {timelineUrl ? (
+              <a href={timelineUrl} target="_blank" rel="noreferrer">
+                {timelineUrl}
+              </a>
+            ) : (
+              <span className="muted">Not available yet</span>
+            )}
+          </p>
+        </div>
       </div>
     </div>
   )
