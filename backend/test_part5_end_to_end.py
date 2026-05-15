@@ -8,9 +8,9 @@ except ImportError:
     from pipeline import process_video_pipeline
 
 
-SAMPLE_VIDEO = "backend/data/raw_videos/sample.mp4"
+SAMPLE_VIDEO = "data/raw_videos/sample.mp4"
 OUTPUT_DIR = "backend/outputs/part5_demo"
-COURT_CORNERS_JSON = "backend/data/court_corners/sample_court_corners.json"
+COURT_CORNERS_JSON = "data/court_corners/sample_court_corners.json"
 
 
 def main() -> None:
@@ -18,7 +18,7 @@ def main() -> None:
     if not sample_path.exists():
         print(
             "Sample video not found. Put a test video at "
-            "backend/data/raw_videos/sample.mp4"
+            "data/raw_videos/sample.mp4"
         )
         return
 

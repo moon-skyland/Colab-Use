@@ -70,7 +70,7 @@ def main() -> None:
 
     generator = InstructionGenerator()
     instruction = generator.generate(
-        video_path="backend/data/raw_videos/demo.mp4",
+        video_path="data/raw_videos/demo.mp4",
         output_path="backend/outputs/demo_edited_video.mp4",
         timeline=timeline_segments,
         pre_roll_seconds=1.0,

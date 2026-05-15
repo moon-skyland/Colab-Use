@@ -9,9 +9,9 @@ def main() -> None:
     print(
         "This script is deprecated. Use:\n"
         "python backend/build_features_from_video.py "
-        "--video backend/data/raw_videos/sample.mp4 "
-        "--court-corners-json backend/data/court_corners/sample_court_corners.json "
-        "--output backend/data/features/features_inference.csv"
+        "--video data/raw_videos/sample.mp4 "
+        "--court-corners-json data/court_corners/sample_court_corners.json "
+        "--output data/features/features_inference.csv"
     )
 
 

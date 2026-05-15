@@ -24,7 +24,7 @@ LABEL_COLUMN = "state"
 
 
 def train_state_model(
-    features_csv_path: str = "backend/data/features/features_train.csv",
+    features_csv_path: str = "data/features/features_train.csv",
     output_model_path: str = "backend/models/state_model.pkl",
 ) -> str:
     """Train and persist a state model and metadata."""
@@ -111,7 +111,7 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train badminton state model.")
     parser.add_argument(
         "--features",
-        default="backend/data/features/features_train.csv",
+        default="data/features/features_train.csv",
         help="Path to labeled training features CSV.",
     )
     parser.add_argument(

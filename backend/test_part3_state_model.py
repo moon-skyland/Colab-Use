@@ -7,9 +7,9 @@ import pandas as pd
 from model.segmentation.state_predictor import StatePredictor
 from model.training.train_state_model import train_state_model
 
-TRAIN_CSV_PATH = "backend/data/features/demo_features_train.csv"
+TRAIN_CSV_PATH = "data/features/demo_features_train.csv"
 MODEL_PATH = "backend/models/demo_state_model.pkl"
-INFERENCE_CSV_PATH = "backend/data/features/demo_features_inference.csv"
+INFERENCE_CSV_PATH = "data/features/demo_features_inference.csv"
 PREDICTIONS_CSV_PATH = "backend/outputs/demo_state_predictions.csv"
 
 
@@ -82,7 +82,7 @@ def _build_synthetic_inference_frame() -> pd.DataFrame:
 
 
 def main() -> None:
-    Path("backend/data/features").mkdir(parents=True, exist_ok=True)
+    Path("data/features").mkdir(parents=True, exist_ok=True)
     Path("backend/models").mkdir(parents=True, exist_ok=True)
     Path("backend/outputs").mkdir(parents=True, exist_ok=True)
 

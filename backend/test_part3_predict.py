@@ -5,9 +5,9 @@ from pathlib import Path
 from model.segmentation.state_predictor import StatePredictor
 
 
-FEATURES_INFERENCE_CSV = "backend/data/features/features_inference.csv"
+FEATURES_INFERENCE_CSV = "data/features/features_inference.csv"
 MODEL_PATH = "backend/models/state_model.pkl"
-OUTPUT_PREDICTIONS_CSV = "backend/data/features/state_predictions.csv"
+OUTPUT_PREDICTIONS_CSV = "data/features/state_predictions.csv"
 
 
 def main() -> None:

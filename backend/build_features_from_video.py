@@ -53,7 +53,7 @@ def build_features_from_video(
     if not corners_file.exists():
         print(
             "Missing court corner JSON. Please create "
-            "backend/data/court_corners/sample_court_corners.json"
+            "data/court_corners/sample_court_corners.json"
         )
         return ""
 
@@ -136,17 +136,17 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--video",
-        default="backend/data/raw_videos/sample.mp4",
+        default="data/raw_videos/sample.mp4",
         help="Input raw video path.",
     )
     parser.add_argument(
         "--court-corners-json",
-        default="backend/data/court_corners/sample_court_corners.json",
+        default="data/court_corners/sample_court_corners.json",
         help="Court corners JSON file path.",
     )
     parser.add_argument(
         "--output",
-        default="backend/data/features/features_inference.csv",
+        default="data/features/features_inference.csv",
         help="Output features CSV path.",
     )
     parser.add_argument(

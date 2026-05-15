@@ -73,8 +73,8 @@ def _build_demo_positions(num_frames: int = 360) -> tuple[list[AthleteCourtPosit
 
 
 def main() -> None:
-    features_dir = Path("backend/data/features")
-    labels_dir = Path("backend/data/state_labels")
+    features_dir = Path("data/features")
+    labels_dir = Path("data/state_labels")
     models_dir = Path("backend/models")
     features_dir.mkdir(parents=True, exist_ok=True)
     labels_dir.mkdir(parents=True, exist_ok=True)

@@ -100,7 +100,7 @@ and then perform actual video cutting.
 
 - `backend/model/`: Python AI/video pipeline code (detectors, tracking, mapping, features, state pipeline, editing).
 - `backend/models/`: trained model files and weights (for example `shuttlecock_yolo.pt` and `state_model.pkl`).
-- `backend/data/`: raw/processed videos, training data, labels, and extracted features.
+- `data/`: raw/processed videos, training data, labels, and extracted features.
 - `backend/outputs/`: generated artifacts such as timelines, instructions, and edited outputs.
 
 ## Training Needed Later
@@ -146,7 +146,7 @@ Train on real features:
 
 ```bash
 python backend/model/training/train_state_model.py \
-  --features backend/data/features/features_train.csv \
+  --features data/features/features_train.csv \
   --output backend/models/state_model.pkl
 ```
 
@@ -160,13 +160,13 @@ Build inference features from raw video (Part 2 -> Part 3 bridge):
 
 ```bash
 python backend/build_features_from_video.py \
-  --video backend/data/raw_videos/sample.mp4 \
-  --court-corners-json backend/data/court_corners/sample_court_corners.json \
-  --output backend/data/features/features_inference.csv \
+  --video data/raw_videos/sample.mp4 \
+  --court-corners-json data/court_corners/sample_court_corners.json \
+  --output data/features/features_inference.csv \
   --max-frames 300
 ```
 
-Note: `backend/data/court_corners/sample_court_corners.json` contains placeholder points.
+Note: `data/court_corners/sample_court_corners.json` contains placeholder points.
 Replace them with real court corner pixel coordinates from your actual video.
 
 ## Part 4 Commands
@@ -182,7 +182,7 @@ Build instruction from predictions:
 ```bash
 python backend/build_instruction_from_predictions.py \
   --predictions backend/outputs/state_predictions.csv \
-  --video backend/data/raw_videos/sample.mp4 \
+  --video data/raw_videos/sample.mp4 \
   --output-video backend/outputs/edited_video.mp4 \
   --timeline-output backend/outputs/state_timeline.json \
   --instruction-output backend/outputs/edit_instruction.json
@@ -194,9 +194,9 @@ Run full backend pipeline directly:
 
 ```bash
 python backend/run_backend_pipeline.py \
-  --video backend/data/raw_videos/sample.mp4 \
+  --video data/raw_videos/sample.mp4 \
   --output-video backend/outputs/edited_video.mp4 \
-  --court-corners-json backend/data/court_corners/sample_court_corners.json
+  --court-corners-json data/court_corners/sample_court_corners.json
 ```
 
 Run FastAPI server:

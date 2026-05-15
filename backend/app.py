@@ -38,7 +38,7 @@ UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "backend/uploads"))
 MAX_VIDEO_SIZE = int(os.getenv("MAX_VIDEO_SIZE", "500000000"))
 COURT_CORNERS_JSON = os.getenv(
     "COURT_CORNERS_JSON",
-    "backend/data/court_corners/sample_court_corners.json",
+    "data/court_corners/sample_court_corners.json",
 )
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 

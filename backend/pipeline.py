@@ -58,7 +58,7 @@ def process_video_pipeline(
         corners_path = (
             Path(court_corners_json)
             if court_corners_json
-            else Path("backend/data/court_corners/sample_court_corners.json")
+            else Path("data/court_corners/sample_court_corners.json")
         )
         if not corners_path.exists():
             if court_corners_json:
@@ -67,7 +67,7 @@ def process_video_pipeline(
                 )
             raise FileNotFoundError(
                 "Missing court corner JSON. Provide --court-corners-json or create "
-                "backend/data/court_corners/sample_court_corners.json"
+                "data/court_corners/sample_court_corners.json"
             )
         if court_corners_json is None:
             warnings.append(

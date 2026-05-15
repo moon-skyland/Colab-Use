@@ -20,12 +20,12 @@ except ImportError:
 def run_full_pipeline(
     video_path: str,
     output_video_path: str,
-    court_corners_json: str = "backend/data/court_corners/sample_court_corners.json",
+    court_corners_json: str = "data/court_corners/sample_court_corners.json",
     max_frames: int = 0,
     window_size_seconds: float = 1.0,
 ) -> dict[str, object]:
     """Run full Part 5 processing pipeline from raw video to edited video."""
-    features_csv = "backend/data/features/features_inference.csv"
+    features_csv = "data/features/features_inference.csv"
     predictions_csv = "backend/outputs/state_predictions.csv"
     timeline_json = "backend/outputs/state_timeline.json"
     instruction_json = "backend/outputs/edit_instruction.json"
@@ -78,7 +78,7 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run full badminton backend pipeline.")
     parser.add_argument(
         "--video",
-        default="backend/data/raw_videos/sample.mp4",
+        default="data/raw_videos/sample.mp4",
         help="Input raw video path.",
     )
     parser.add_argument(
@@ -88,7 +88,7 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--court-corners-json",
-        default="backend/data/court_corners/sample_court_corners.json",
+        default="data/court_corners/sample_court_corners.json",
         help="Court corners JSON path.",
     )
     parser.add_argument(

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "video_path": "backend/data/raw_videos/sample.mp4",
+  "video_path": "data/raw_videos/sample.mp4",
   "output_path": "backend/outputs/edited_video.mp4",
   "keep_intervals": [
     {

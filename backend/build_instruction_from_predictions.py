@@ -119,7 +119,7 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--video",
-        default="backend/data/raw_videos/sample.mp4",
+        default="data/raw_videos/sample.mp4",
         help="Input raw video path.",
     )
     parser.add_argument(
