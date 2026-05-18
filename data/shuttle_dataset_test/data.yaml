@@ -1,4 +1,4 @@
-path: data/shuttle_dataset
+path: data/shuttle_dataset_test
 train: images/train
 val: images/val
 
